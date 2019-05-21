@@ -18,7 +18,8 @@ RabbitMQ提供了一种`qos`（服务质量保证）功能，即在非自动确�
  * entire channel rather than each consumer
  * @throws java.io.IOException if an error is encountered
  * prefetchSize 消息的大小，一般为0，不做限制
- * prefetchCount：会告诉RabbitMQ不要同时给一个消费者推送多个N个消息，即一个有N个消息还没有ack，则		* 该consumer将block掉，知道有消息ack 
+ * prefetchCount：会告诉RabbitMQ不要同时给一个消费者推送多个N个消息，
+ * 即一个有N个消息还没有ack，则该consumer将block掉，知道有消息ack 
  * global true、false 是否设置应用于channel，限制在channel级别还是consumer级别
  */
 void basicQos(int prefetchSize, int prefetchCount, boolean global) throws IOException;
@@ -70,3 +71,84 @@ DLX：`Dead-Letter_Exchange`
 当这个队列中有死信时，`RabbitMQ`就会自动的讲这个消息重新发布到设置的Exchange上去，进而被路由到另一个队列。
 
 可以监听这个队列中消息做相应的处理，这个特性可以弥补`RabbitMQ 3.0`以前支持的`immeditae`参数的功能
+
+
+
+# RabbitMQ 整合Spring AMQP
+
+- Rabbit Admin
+- Spring AMQP声明
+- RabbitTemplate
+- SimpleMessageListenerContainer
+- MessageListenerAdapter
+- MessageConverter
+
+
+
+## Rabbit Admin
+
+可以很好的操作RabbitMQ，在Spring中直接进行注入即可
+
+```java
+@Bean
+public RabbitAdmin rabbitAdmin(ConnectionFactory connectionFactory){
+    RabbitAdmin rabbitAdmin = new RabbitAdmin(connectionFactory);
+    rabbitAdmin.setAutoStartup(true);
+    return rabbitAdmin;
+}
+```
+
+- `autoStartup`必须设置为`true`，否则Spring容器不会加载RabbitAdmin类
+- `RabbitAdmin`底层实现就是从`Spring`容器中获取`Exchange`、`Binding`、`RoutingKey`以及`Queue`的`@Bean`声明
+- 然后使用`RabbitTemplate`的`execute`的方法执行对应的声明、修改、删除等一些类基础功能操作
+
+
+
+## RabbitTemplate 消息模板
+
+- 与Spring AMQP整合的时候进行发送消息的关键类
+- 该类提供了丰富的发送消息方法，包括可靠投递消息的方法，回调监听消息接口`ConfirmCallback`、返回值确认接口`ReturnCallback`等等。同样需要注入到Spring容器中，然后使用
+
+
+
+## SimpleMessageListenerContainer
+
+监听多个队列，自动启动，自动声明
+
+- 设置事务特性、事务管理器、事务属性、事务容量（并发）、是否开启事务、回滚消息等
+- 设置消费者数量、最小最大数据、批量消费
+- 设置消息确认和自动确认模式、是否重回队列、异常捕获`handler`函数
+- 设置消费者标签生成策略、是否独占模式、消费者属性等
+- 设置具体的监听器、消息转换器等
+
+
+
+## MessageListenerAdapter 消息监听适配器
+
+- `defaultListenerMethod` 默认监听方法名称：用于设置监听方法名称
+- `Delegate`委托对象：实际真实的委托对象，用于处理消息
+- `queueOrTagToMethodName`队列标识与方法名称组合的集合
+- 可以一一进行队列与方法名称的匹配
+- 队列和方法名称绑定，即指定队列里的消息会被绑定的方法所接受处理
+
+## MessageConverter 消息转换器
+
+正常情况下消息体为二进制的数据方法进行传输，入股希望内部帮我们进行转换，或者指定自定义的额转化器，就需要用到转换器
+
+
+
+# SpringBoot 整合配置详解
+
+- publisher-confirms 实现一个监听器用于监听Broker端给我们返回的确认请求：
+
+`RabbitTemplate.ConfirmCallback`
+
+- publisher-returns 保证消息对Broker端是可达的，如果出现路由键不可达的情况，则使用监听器对不可达的消息进行后续处理，保证消息的路由成功
+
+`RabbitTemplate.ReturnCallback`
+
+
+
+- 在发送消息的时候对template进行配置`mandatory=true`保证监听有效
+- 生产端还可以配置其他属性，如果发送重试，超时时间，次数，间隔等
+
