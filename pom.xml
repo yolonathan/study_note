@@ -7,6 +7,7 @@
         <module>rabbitmq</module>
         <module>spring-security</module>
         <module>spring-cloud-oauth2</module>
+        <module>java-concurrency</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -38,7 +39,6 @@
     </dependencyManagement>
 
     <dependencies>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
