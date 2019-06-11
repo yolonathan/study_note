@@ -135,12 +135,33 @@ public enum State {
    - 需要被唤醒，加时间除外
 
 - 线程组详解
+
+可以访问自己的线程组，可以访问父线程组的可读属性
+
+```java
+private ThreadGroup() {     // called from C code
+    this.name = "system";
+    this.maxPriority = Thread.MAX_PRIORITY;
+    this.parent = null;
+}
+
+public ThreadGroup(String name) {
+    this(Thread.currentThread().getThreadGroup(), name);
+}
+
+public ThreadGroup(ThreadGroup parent, String name) {
+    this(checkParentAccess(parent), parent, name);
+}
+```
+
+
+
 - 自运行对象详解
 - 线程异常回调
 - 线程池详解
 - 等待线程完成任务
-- 阻塞IO和多part1.sync
-sync- 自定义线程锁详解
+- 阻塞IO和多sync
+  sync- 自定义线程锁详解
 - FIFO队列与线程
 - 多线程`API`查缺补漏
 
