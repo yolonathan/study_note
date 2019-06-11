@@ -217,6 +217,176 @@ public ThreadGroup(ThreadGroup parent, String name) {
   - 自定义Lock
   - 自定义原子对象
 
+## 单例模式
+
+### 饿汉式
+
+```java
+public class SingletonObject1 {
+
+    /**
+     * can't lazy load.
+     */
+    private static final SingletonObject1 instance = new SingletonObject1();
+
+    private SingletonObject1() {
+        //empty
+    }
+
+    public static SingletonObject1 getInstance() {
+        return instance;
+    }
+}
+```
+
+### 懒汉式
+
+**在多线程下会有并发问题**
+
+```java
+public class SingletonObject2 {
+
+    private static SingletonObject2 instance;
+
+    private SingletonObject2() {
+        //empty
+    }
+
+    public static SingletonObject2 getInstance() {
+        if (null == instance)
+            instance = new SingletonObject2();
+
+        return SingletonObject2.instance;
+    }
+}
+```
+
+### 懒汉式-加锁
+
+`getInstance`变成串行，效率低 
+
+```java
+public class SingletonObject3 {
+    private static SingletonObject3 instance;
+
+    private SingletonObject3() {
+        //empty
+    }
+
+    public synchronized static SingletonObject3 getInstance() {
+
+        if (null == instance) {
+            instance = new SingletonObject3();
+        }
+
+        return SingletonObject3.instance;
+    }
+}
+```
+
+### 懒汉式-双检查
+
+可能会引发**空指针异常**，可能还没有初始化完成就开始访问了
+
+```java
+public class SingletonObject4 {
+
+    private static SingletonObject4 instance;
+
+    private SingletonObject4() {}
+
+    //double check
+    public static SingletonObject4 getInstance() {
+
+        if (null == instance) {
+            synchronized (SingletonObject4.class) {
+                if (null == instance) {
+                    instance = new SingletonObject4();
+                }
+            }
+        }
+
+        return SingletonObject4.instance;
+    }
+}
+```
+
+### 懒汉式-双检查和可见性(防止重排序)
+
+```java
+public class SingletonObject5 {
+
+    private static volatile SingletonObject5 instance;
+
+    private SingletonObject5() {}
+
+    //double check add volatile
+    public static SingletonObject5 getInstance() {
+
+        if (null == instance) {
+            synchronized (SingletonObject4.class) {
+                if (null == instance) {
+                    instance = new SingletonObject5();
+                }
+            }
+        }
+        return SingletonObject5.instance;
+    }
+}
+```
+
+### Holder的方式
+
+线程安全，懒加载，效率高，不需要锁
+
+```java
+public class SingletonObject6 {
+
+    private SingletonObject6() {
+
+    }
+
+    private static class InstanceHolder {
+      	// 只执行一次
+        private final static SingletonObject6 instance = new SingletonObject6();
+    }
+
+    public static SingletonObject6 getInstance() {
+        return InstanceHolder.instance;
+    }
+}
+```
+
+### 枚举
+
+```java
+public class SingletonObject7 {
+    private SingletonObject7() {
+
+    }
+
+    private enum Singleton {
+        INSTANCE;
+
+        private final SingletonObject7 instance;
+
+        Singleton() {
+            instance = new SingletonObject7();
+        }
+
+        public SingletonObject7 getInstance() {
+            return instance;
+        }
+    }
+
+    public static SingletonObject7 getInstance() {
+        return Singleton.INSTANCE.getInstance();
+    }
+}
+```
+
+
+
 # 并发编程深入探讨
 
 - 死锁诊断，JVM工具，线程堆栈介绍
