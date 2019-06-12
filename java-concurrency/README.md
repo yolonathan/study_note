@@ -482,7 +482,7 @@ volatile关键字是无法替代synchronized关键字的，因为volatile关键�
 2. 可见性
 3. 有序性
 
-#### happens-before规则
+### happens-before规则
 
 - 程序次序规则：一个线程内，按照代码顺序，书写在前面的操作先行发生于书写在后面的操作
 - 锁定规则：一个unLock操作先行发生于后面对同一个锁额lock操作
@@ -499,6 +499,24 @@ volatile关键字是无法替代synchronized关键字的，因为volatile关键�
 
 - 状态量标记
 - 屏障前后的一致性
+
+
+
+## 观察者设计模式
+
+`Observer`
+
+代码：`part2.observer`
+
+订阅一个主题，当主题发生变化后，通知到观察者
+
+### 多线程中的观察者模式
+
+代码：`part2.observer.thread`
+
+
+
+
 
 
 # JDK并发包详细介绍
