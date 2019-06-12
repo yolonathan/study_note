@@ -183,40 +183,6 @@ public ThreadGroup(ThreadGroup parent, String name) {
 - Active Object 接受异步消息的主动对象
 - 设计模式差缺补漏
 
-# JDK并发包详细介绍
-
-- 原子变量
-- Unsafe
-- CountDownLatch
-- CyclicBarrier
-- Exchanger
-- ExecutorService
-- Phaser
-- 显式锁
-  - ReetrantLock
-  - ReadWriteLock
-  - StampedLock
-- Condition
-- Semaphore信号量
-- ForkJoin
-- Concurrent容器
-  - ConcurrentHashMap
-  - ConcurrentLinkedDeque
-  - ConcurrentSkipListMap
-  - ConcurrentSkipSet
-  - CopyOnWriteArraySet
-  - DelayQueue
-  - LinkedBlockingQueue
-  - LinkedTransferQueue
-  - PriorityBlockingQueue
-- CompletableFuture
-- 自定义并发类
-  - 自定义ThreadPoolExecutor
-  - 实现一个优先级线程池
-  - ThreadFactory
-  - 自定义Lock
-  - 自定义原子对象
-
 ## 单例模式
 
 ### 饿汉式
@@ -384,6 +350,190 @@ public class SingletonObject7 {
     }
 }
 ```
+
+
+
+## Wait Set的概念
+
+`WaitSet` in synchronized monitor
+
+“线程休息室”
+
+- 所有的对象都会有一个wait set,用来存放调用了该对象wait方法之后进入block状态线程
+
+* 2.线程被notify之后，不一定立即得到执行
+* 3.线程从wait set中被唤醒顺序不一定是FIFO.
+* 4.线程被唤醒后，必须重新获取锁
+
+## Volatile 关键字
+
+volatile关键字的两层语义 一旦一个共享变量（类的成员变量、类的静态成员变量）被volatile修饰之后，那么就具备了两层语义
+
+- 保证了不同线程对这个变量进行操作时的可见性，即一个线程修改了某个变量的值，这新值对其他线程来说是立即可见的
+- 禁止进行指令重排序
+
+```java
+// 线程1
+boolean stop = false;
+while(!stop){
+    doSomething();
+}
+ 
+// 线程2
+stop = true;
+```
+
+用volatile修饰之后：
+
+- 使用volatile关键字会强制将修改的值立即写入主存
+- 使用volatile关键字的话，当线程2进行修改时，会导致线程1的工作内存中缓存变量stop的缓存行无效（反映到硬件层的话，就是CPU的`L1`或者`L2`缓存中对应的缓存行无效）
+- 由于线程1的工作内存中缓存变量stop的缓存行无效，所以线程1再次读取变量stop的值时会去主存读取
+
+### volatile与原子性
+
+```java
+public class Test {
+    public volatile int inc = 0;
+     
+    public void increase() {
+        inc++;
+    }
+     
+    public static void main(String[] args) {
+        final Test test = new Test();
+        for(int i=0;i<10;i++){
+            new Thread(){
+                public void run() {
+                    for(int j=0;j<1000;j++)
+                        test.increase();
+                };
+            }.start();
+        }
+         
+        while(Thread.activeCount()>1)  //保证前面的线程都执行完
+            Thread.yield();
+        System.out.println(test.inc);
+    }
+}
+```
+
+运行它会发现每次运行结果都不一致，都是一个小于10000的数字
+
+**自增操作不是原子性操作，而且volatile也无法保证对变量的任何操作都是原子性的**
+
+
+
+### volatile与有序性
+
+在前面提到volatile关键字能禁止指令重排序，所以volatile能在一定程度上保证有序性
+
+volatile关键字禁止指令重排序有两层意思：
+
+- 当程序执行到volatile变量的读操作或者写操作时，在其前面的操作的更改肯定全部已经进行，且结果已经对后面的操作可见；在其后面的操作肯定还没有进行
+- 在进行指令优化时，不能将在对volatile变量访问的语句放在其后面执行，也不能把volatile变量后面的语句放到其前面执行
+
+```java
+//x、y为非volatile变量
+//flag为volatile变量
+ 
+x = 2;        //语句1
+y = 0;        //语句2
+flag = true;  //语句3
+x = 4;         //语句4
+y = -1;       //语句5
+```
+
+由于flag变量为volatile变量，那么在进行指令重排序的过程的时候，不会将语句3放到语句1、语句2前面，也不会讲语句3放到语句4、语句5后面。但是要注意语句1和语句2的顺序、语句4和语句5的顺序是不作任何保证的。
+
+并且volatile关键字能保证，执行到语句3时，语句1和语句2必定是执行完毕了的，且语句1和语句2的执行结果对语句3、语句4、语句5是可见的
+
+
+
+### volatile的原理和实现机制
+
+如何保证可见性和禁止指令重排序的？
+
+《深入理解Java虚拟机》
+
+> 观察加入volatile关键字和没有加入volatile关键字时所生成的汇编代码发现，加入volatile关键字时，会多出一个lock前缀指令
+
+lock前缀指令实际上相当于一个内存屏障（也成内存栅栏），内存屏障会提供3个功能：
+
+- 它确保指令重排序时不会把其后面的指令排到内存屏障之前的位置，也不会把前面的指令排到内存屏障的后面；即在执行到内存屏障这句指令时，在它前面的操作已经全部完成
+- 它会强制将对缓存的修改操作立即写入主存
+- 如果是写操作，它会导致其他CPU中对应的缓存行无效
+
+### volatile与synchronized
+
+volatile关键字是无法替代synchronized关键字的，因为volatile关键字无法保证操作的原子性
+
+通常来说，使用volatile必须具备以下2个条件：
+
+- 对变量的写操作不依赖于当前值
+- 该变量没有包含在具有其他变量的不变式中
+
+实际上，这些条件表明，可以被写入 volatile 变量的这些有效值独立于任何程序的状态，包括变量的当前状态
+
+事实上，我的理解就是上面的2个条件需要保证操作是原子性操作，才能保证使用volatile关键字的程序在并发时能够正确执行
+
+
+
+1. 原子性
+2. 可见性
+3. 有序性
+
+#### happens-before规则
+
+- 程序次序规则：一个线程内，按照代码顺序，书写在前面的操作先行发生于书写在后面的操作
+- 锁定规则：一个unLock操作先行发生于后面对同一个锁额lock操作
+- volatile变量规则：对一个变量的写操作先行发生于后面对这个变量的读操作
+- 传递规则：如果操作A先行发生于操作B，而操作B又先行发生于操作C，则可以得出操作A先行发生于操作C
+- 线程启动规则：Thread对象的start()方法先行发生于此线程的每个一个动作
+- 线程中断规则：对线程interrupt()方法的调用先行发生于被中断线程的代码检测到中断事件的发生
+- 线程终结规则：线程中所有的操作都先行发生于线程的终止检测，我们可以通过Thread.join()方法结束、Thread.isAlive()的返回值手段检测到线程已经终止执行
+- 对象终结规则：一个对象的初始化完成先行发生于他的finalize()方法的开始
+
+
+
+### 使用场景
+
+- 状态量标记
+- 屏障前后的一致性
+
+
+# JDK并发包详细介绍
+
+- 原子变量
+- Unsafe
+- CountDownLatch
+- CyclicBarrier
+- Exchanger
+- ExecutorService
+- Phaser
+- 显式锁
+  - ReetrantLock
+  - ReadWriteLock
+  - StampedLock
+- Condition
+- Semaphore信号量
+- ForkJoin
+- Concurrent容器
+  - ConcurrentHashMap
+  - ConcurrentLinkedDeque
+  - ConcurrentSkipListMap
+  - ConcurrentSkipSet
+  - CopyOnWriteArraySet
+  - DelayQueue
+  - LinkedBlockingQueue
+  - LinkedTransferQueue
+  - PriorityBlockingQueue
+- CompletableFuture
+- 自定义并发类
+  - 自定义ThreadPoolExecutor
+  - 实现一个优先级线程池
+  - ThreadFactory
+  - 自定义Lock
+  - 自定义原子对象
 
 
 
