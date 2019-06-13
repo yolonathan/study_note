@@ -543,6 +543,18 @@ volatile关键字是无法替代synchronized关键字的，因为volatile关键�
 
 
 
+## Guarded Suspension设计模式
+
+
+
+
+
+## ThreadLocal
+
+
+
+## 多线程运行上下文设计模式
+
 
 
 # JDK并发包详细介绍
