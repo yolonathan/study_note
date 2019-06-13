@@ -514,6 +514,24 @@ volatile关键字是无法替代synchronized关键字的，因为volatile关键�
 
 代码：`part2.observer.thread`
 
+## 多线程读写锁分离
+
+手写读写锁
+
+
+
+## 不可变对象设计模式
+
+不可变对象是线程安全的
+
+可变对象不一定是不安全的
+
+`servlet`不是线程安全的
+
+`struts 1` Action 不是线程安全的
+
+`struts 2` 是线程安全的
+
 
 
 
