@@ -8,6 +8,7 @@
         <module>spring-security</module>
         <module>spring-cloud-oauth2</module>
         <module>java-concurrency</module>
+        <module>poi</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>
