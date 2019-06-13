@@ -534,6 +534,14 @@ volatile关键字是无法替代synchronized关键字的，因为volatile关键�
 
 
 
+## Future模式
+
+- Future ：代表的是未来的一个凭据
+
+* FutureTask：将你的调用逻辑进行了隔离
+* FutureService：桥接 Future和 FutureTask
+
+
 
 
 
