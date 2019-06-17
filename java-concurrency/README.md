@@ -557,6 +557,16 @@ volatile关键字是无法替代synchronized关键字的，因为volatile关键�
 
 
 
+## 多线程Balking设计模式
+
+
+
+## 生产者消费者模式
+
+
+
+
+
 # JDK并发包详细介绍
 
 - 原子变量

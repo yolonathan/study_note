@@ -1,6 +1,9 @@
 package poi;
 
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -21,6 +24,11 @@ public class Demo5 {
         Sheet sheet = wb.createSheet("第一个Sheet页");
         // 创建一个行
         Row row = sheet.createRow(0);
+        CellStyle cellStyle = wb.createCellStyle();
+        // 前景色
+        cellStyle.setFillForegroundColor(IndexedColors.RED.getIndex());
+        cellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        row.setRowStyle(cellStyle);
         // 创建一个单元格  第1列
         Cell cell = row.createCell(0);
         // 给单元格设置值
@@ -28,7 +36,7 @@ public class Demo5 {
 
         row.createCell(1).setCellValue(1);
         row.createCell(2).setCellValue("一个字符串");
-        row.createCell(3).setCellValue(true);
+        row.createCell(3).setCellValue("aaaaaaaaa");
         row.createCell(4).setCellValue(0.0);
         row.createCell(5).setCellValue(false);
 
