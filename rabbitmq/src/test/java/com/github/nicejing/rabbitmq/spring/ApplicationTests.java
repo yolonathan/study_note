@@ -8,7 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 /**
- * @author jingzb@fosun.com
+ * @author Nathan
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
