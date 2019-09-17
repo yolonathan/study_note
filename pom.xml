@@ -10,6 +10,7 @@
         <module>java-concurrency</module>
         <module>poi</module>
         <module>data-structure</module>
+        <module>flux</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>
