@@ -1,4 +1,4 @@
-package stream;
+package test.stream;
 
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;

@@ -1,7 +1,6 @@
-package lambda;
+package test.lambda;
 
 import java.text.DecimalFormat;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**

@@ -1,4 +1,4 @@
-package lambda;
+package test.lambda;
 
 /**
  * @author Jing Zhi Bao

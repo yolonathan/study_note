@@ -1,4 +1,4 @@
-package stream;
+package test.stream;
 
 import java.util.ArrayList;
 import java.util.Arrays;
