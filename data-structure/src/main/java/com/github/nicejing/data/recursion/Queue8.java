@@ -30,20 +30,46 @@ public class Queue8 {
     private void check(int n) {
 
         //n = 8 , 其实8 个皇后就既然放好
-        if(n == max) {
+        if (n == max) {
             print();
             return;
         }
 
         //依次放入皇后，并判断是否冲突
         // max = 8
-        for(int i = 0; i < max; i++) {
+        for (int i = 0; i < max; i++) {
             //先把当前这个皇后n , 放到该行的第1 列
             array[n] = i;
             //判断当放置第n 个皇后到i 列时，是否冲突
-
+            // 不冲突
+            if (judge(n)) {
+                //接着放n+1 个皇后,即开始递归
+                check(n + 1);
+            }
+            //如果冲突，就继续执行array[n] = i; 即将第n 个皇后，放置在本行得后移的一个位置
         }
 
+    }
+
+    /**
+     * @param n 表示第n 个皇后
+     * @return
+     */
+    private boolean judge(int n) {
+        judgeCount++;
+        for (int i = 0; i < n; i++) {
+            // 说明
+            //1. array[i] == array[n] 表示判断第n 个皇后是否和前面的n-1 个皇后在同一列
+            //2. Math.abs(n-i) == Math.abs(array[n] - array[i]) 表示判断第n 个皇后是否和第i 皇后是否在同一斜线
+            // n = 1 放置第2 列1 n = 1 array[1] = 1
+            // Math.abs(1-0) == 1 Math.abs(array[n] - array[i]) = Math.abs(1-0) = 1
+            //3. 判断是否在同一行, 没有必要，n 每次都在递增
+            if (array[i] == array[n] || Math.abs(n - i) == Math.abs(array[n] - array[i])) {
+                return false;
+
+            }
+        }
+        return true;
     }
 
 
@@ -56,6 +82,6 @@ public class Queue8 {
         for (int i = 0; i < array.length; i++) {
             System.out.print(array[i] + " ");
         }
-        System.out.println();
+        System.out.println("==============");
     }
 }
